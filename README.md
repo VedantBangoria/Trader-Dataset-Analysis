@@ -82,7 +82,31 @@ from sklearn.metrics import r2_score, mean_squared_error
 ### Aggressiveness Calculation
 ```python
 def mostAggressiveTraders():
-    ...
+    traderAgressivenessScores = {}
+
+    for row in df.itertuples(index=True):
+        #higher fraction means more price levels consumed per transaction, indicating larger orders and therefore more aggressiveness
+        plcOverTransactions = (row.price_levels_consumed/row.transactions_per_day) if row.transactions_per_day != 0 else None
+        lvlsPerTransaction = row.price_levels_per_transaction
+        lvlsConsumedPerTransac_vw = row.price_levels_consumed_vw
+
+        #distance from midpoint price indicates how much a trader is willing to sacrifice, measuring their riskiness and therefore aggression
+        traderExitMeasure = row.mean_delta
+        
+        #account for zero division errors
+        if(plcOverTransactions == None):
+            traderAggressiveness = (lvlsPerTransaction * .15) + (lvlsConsumedPerTransac_vw * .17) + (traderExitMeasure * .15)
+            traderAggressiveness += (row.transactions_per_day * .20) + (1/row.mean_time) * .13 + (math.log(row.markets_per_day + 1) * .20)
+        else:
+            traderAggressiveness = (plcOverTransactions * .18) + (lvlsPerTransaction * .15) + (lvlsConsumedPerTransac_vw * .12) + (traderExitMeasure * .10)
+            traderAggressiveness += (row.transactions_per_day * .15) + (1/row.mean_time) * .10 + (math.log(row.markets_per_day + 1) * .20)
+
+        traderAgressivenessScores[(row.trader, row.Index)] = traderAggressiveness
+
+
+    sorted_traders = dict(sorted(traderAgressivenessScores.items(), key=lambda item: item[1], reverse=True))
+    return sorted_traders
+
 ```
 
 ### Aggressiveness vs. PNL Plot
