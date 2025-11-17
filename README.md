@@ -222,7 +222,7 @@ transactions_per_day:         0.0658
 
 Clone the repo:
 ```bash
-git clone https://github.com/<your-username>/<your-repo>.git
+git clone https://github.com/VedantBangoria/Trader-Dataset-Analysis.git
 ```
 
 Install dependencies:
